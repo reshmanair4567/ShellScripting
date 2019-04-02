@@ -1,0 +1,47 @@
+#!/bin/bash
+
+
+#Display the user id
+echo "Your User ID is ${UID}"
+
+#Display the user name
+USER_NAME=$(id -un)
+echo " Your username is ${USER_NAME}"
+
+#IF statement - user executing script if not root user , do not create a user and return exit status 1
+
+if [[ "${UID}" -eq 0 ]]
+then
+        echo 'you are root user'
+        read -p 'Enter the user name for Account: ' USER_NAME
+        read -p 'Enter the name of Account holder: ' COMMENT
+        read -p ' Enter a password: ' PASSWORD
+
+#Create username
+        useradd -c "${COMMENT}" -m "${USER_NAME}"
+
+#check if useradd command succeeded
+if [[ "${?}" -ne 0 ]]
+then
+        echo 'user account was not created successfully'
+        exit 1
+fi
+
+#Set password
+        echo "${PASSWORD}" | passwd --stdin "${USER_NAME}"
+
+if  [[ "${?}" -ne 0 ]]
+then
+        echo 'password was not created successfully'
+fi
+#force reset  password on first time log in
+        passwd -e "${USER_NAME}"
+
+else
+        exit 2
+
+fi
+#display username,password,and host where the user was created
+echo "User Name: ${USER_NAME}"
+echo "Hostname: ${HOSTNAME}"
+exit 3

@@ -1,0 +1,60 @@
+
+if [["${UID} -ne 0 ]]
+then
+        echo 'Please enter as sudo or root user'
+        exit 1
+fi
+
+#if thet don't supply any arguements , then give them help
+
+if [[ "${#} -eq 0 ]]
+then
+        echo  "Usage : ${0} USER_NAME[COMMENT]..."
+
+        echo 'Create an account on the local system with the name of USER_NAME and comments field of COMMENT'
+        exit 1
+fi
+
+#the first parameter is the user name
+USER_NAME = "${1}"
+
+#The rest of te parameters are account comments
+shift
+COMMENT="${@}"
+
+
+
+#Generate a password
+PASSWORD=$(date +%s%N | shuf |head -c48)
+
+#Create the user with a password
+useradd -c "${COMMENT}" -m "${USER_NAME}"
+
+#Check if the useradd command succeeded
+if [[ "${?}" -ne 0 ]]
+then
+        echo 'user account was not created'
+        exit 1
+fi
+
+#set the password on the account
+echo "${PASSWORD}" | passwd --stdin "${USER_NAME}"
+
+#Check if the password command succeeded
+
+  if [[ "${?}" -ne 0 ]]
+then
+        echo 'password was not created'
+        exit 1
+fi
+
+#force change of password on first log in
+passwd -e "${USER_NAME}"
+
+#display the username , password and host
+echo "USER NAME:"
+echo $USER_NAME
+echo 'PASSWORD:'
+echo $PASSWORD
+echo 'HOST:'
+echo "${HOSTNAME}"
